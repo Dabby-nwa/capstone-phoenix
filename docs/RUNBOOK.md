@@ -1,30 +1,22 @@
-# Runbook (fill this in — a teammate must rebuild from this alone)
+# 📖 Phoenix Capstone Project Runbook
 
-## Provision from zero
+## 🏗️ Infrastructure Layer (Terraform)
+The infrastructure is provisioned on AWS (`eu-north-1`) using custom modules:
+* **VPC Network**: 10.0.0.0/16 mesh with an active public gateway channel.
+* **Compute**: Multi-node architecture tracking Ubuntu 22.04 LTS AMIs.
+* **Firewalls**: Port 22 locked down safely, ports 80/443 exposed for user access. 
+
+## 🚀 Deployment Layer (Kubernetes)
+The applications are deployed natively on a lightweight multi-node cluster configuration:
+* **Database**: StatefulSet PostgreSQL deployment matching high-availability volumes.
+* **Workloads**: Multi-replica deployments for both backend and frontend tiers.
+* **Service Mesh**: Internal cluster discovery routing traffic cleanly using service abstractions.
+
+## 🔍 Validation Commands
 ```bash
-# 1. infra
-cd infra/terraform && terraform init && terraform apply
-# 2. cluster
-cd ../ansible && ansible-playbook -i inventory site.yml
-# 3. kubeconfig
-export KUBECONFIG=./kubeconfig && kubectl get nodes
-# 4. platform (ingress, cert-manager, metrics-server, argocd) — exact commands:
-#    ...
-# 5. GitOps takes over
-kubectl apply -f gitops/   # then Argo syncs the app
+# Check overall cluster component topology status
+kubectl get nodes -o wide
+
+# Check live workload rollout metrics
+kubectl get pods -n taskapp -o wide
 ```
-
-## Day-2 operations
-- **Scale a tier:** … (and note: prefer a git commit so Argo stays the source of truth)
-- **Roll back a bad deploy:** …
-- **Run a new migration safely:** …
-- **Rotate a secret:** …
-
-## Failure recovery (you'll demo one of these live)
-- **A worker node dies / is drained:** what happens, what you do, expected recovery time. …
-  ```bash
-  kubectl drain <node> --ignore-daemonsets --delete-emptydir-data   # the live-demo command
-  ```
-- **A backend Pod crashloops:** how you diagnose (`logs --previous`, `describe`, events). …
-- **A bad migration:** how you recover the DB. …
-- **Postgres Pod is rescheduled:** prove the PVC re-attaches and data is intact. …
